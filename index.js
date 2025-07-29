@@ -11,10 +11,10 @@ import { z } from 'zod';
 
 const execAsync = promisify(exec);
 
-// Путь к файлу логов
+// Path to log file
 const LOG_FILE = path.join(os.homedir(), '.mcp-shell-commands.log');
 
-// Функция для записи в лог
+// Function to write to log
 async function logCommand(command, result, error = null) {
   const logEntry = {
     timestamp: new Date().toISOString(),
@@ -32,24 +32,28 @@ async function logCommand(command, result, error = null) {
   }
 }
 
-// Создаем MCP сервер
+// Create MCP server
 const mcpServer = new McpServer({
   name: 'mcp-shell-logger',
-  version: '1.0.0',
+  version: '2.0.0',
 });
 
-// Регистрируем инструмент для выполнения команд
+// Register main tool for command execution
 mcpServer.registerTool('execute_command', {
-  description: 'Execute a shell command and log the result',
+  description: 'Execute a shell command with optional output limiting and logging',
   inputSchema: {
     command: z.string().describe('The shell command to execute'),
     workingDirectory: z.string().optional().describe('Working directory for command execution'),
+    maxOutput: z.number().optional().default(500).describe('Maximum characters to return (-1 for unlimited, 0 for no output, default: 500)'),
+    enableLogging: z.boolean().optional().default(true).describe('Whether to save command and output to log file (default: true)'),
   },
-}, async ({ command, workingDirectory }) => {
+}, async ({ command, workingDirectory, maxOutput, enableLogging }) => {
   const startTime = Date.now();
   
   try {
-    const options = {};
+    const options = {
+      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+    };
     if (workingDirectory) {
       options.cwd = workingDirectory;
     }
@@ -57,31 +61,72 @@ mcpServer.registerTool('execute_command', {
     const result = await execAsync(command, options);
     const duration = Date.now() - startTime;
     
-    await logCommand(command, { ...result, duration });
+    // Log if enabled
+    if (enableLogging) {
+      await logCommand(command, { ...result, duration });
+    }
+    
+    // Process output based on maxOutput
+    let stdout = result.stdout;
+    let stderr = result.stderr;
+    let outputSize = stdout.length;
+    let truncated = false;
+    
+    if (maxOutput !== -1) {
+      if (stdout.length > maxOutput) {
+        stdout = stdout.substring(0, maxOutput) + (maxOutput > 0 ? '\n... (output truncated)' : '');
+        truncated = true;
+      }
+      
+      if (stderr.length > maxOutput) {
+        stderr = stderr.substring(0, maxOutput) + (maxOutput > 0 ? '\n... (error output truncated)' : '');
+        truncated = true;
+      }
+    }
     
     return {
       content: [
         {
           type: 'text',
-          text: `Command executed successfully:\n\nOutput:\n${result.stdout}\n${result.stderr ? `\nErrors:\n${result.stderr}` : ''}`,
+          text: `Command executed successfully (${duration}ms)${truncated ? ` - Output: ${outputSize} chars (truncated to ${maxOutput})` : ''}:\n\nOutput:\n${stdout}\n${stderr ? `\nErrors:\n${stderr}` : ''}`,
         },
       ],
     };
   } catch (error) {
-    await logCommand(command, null, error);
+    const duration = Date.now() - startTime;
+    
+    // Log error if enabled
+    if (enableLogging) {
+      await logCommand(command, null, error);
+    }
+    
+    // Process error output
+    let stdout = error.stdout || '';
+    let stderr = error.stderr || '';
+    let outputSize = stdout.length + stderr.length;
+    
+    if (maxOutput !== -1) {
+      if (stdout.length > maxOutput) {
+        stdout = stdout.substring(0, maxOutput) + (maxOutput > 0 ? '\n... (output truncated)' : '');
+      }
+      
+      if (stderr.length > maxOutput) {
+        stderr = stderr.substring(0, maxOutput) + (maxOutput > 0 ? '\n... (error output truncated)' : '');
+      }
+    }
     
     return {
       content: [
         {
           type: 'text',
-          text: `Command failed:\n\nError: ${error.message}\n\nOutput:\n${error.stdout || ''}\n\nError output:\n${error.stderr || ''}`,
+          text: `Command failed (${duration}ms) - Total output: ${outputSize} chars:\n\nError: ${error.message}\n\nOutput:\n${stdout}\n\nError output:\n${stderr}`,
         },
       ],
     };
   }
 });
 
-// Регистрируем инструмент для просмотра логов
+// Register tool for viewing logs
 mcpServer.registerTool('view_logs', {
   description: 'View recent command logs',
   inputSchema: {
@@ -122,7 +167,7 @@ mcpServer.registerTool('view_logs', {
   }
 });
 
-// Запускаем сервер
+// Start server
 async function main() {
   const transport = new StdioServerTransport();
   await mcpServer.connect(transport);

@@ -1,6 +1,6 @@
 {
   "name": "mcp-shell-logger",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "MCP server for shell command execution with logging",
   "type": "module",
   "main": "index.js",
