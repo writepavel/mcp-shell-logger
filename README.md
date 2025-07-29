@@ -1,108 +1,108 @@
 # MCP Shell Logger
 
-MCP сервер для выполнения shell команд с гибкими настройками вывода и логирования.
+MCP server for executing shell commands with flexible output and logging settings.
 
-## Описание
+## Description
 
-Этот MCP сервер предоставляет универсальный инструмент для выполнения shell команд с возможностью контроля над выводом и логированием. Особенно полезен для работы с командами, генерирующими большой объём вывода.
+This MCP server provides a universal tool for executing shell commands with control over output and logging. It is especially useful for working with commands that generate a large amount of output.
 
-## Установка
+## Installation
 
 ```bash
 npm install
 ```
 
-## Использование
+## Usage
 
-Сервер предоставляет два инструмента:
+The server provides two tools:
 
 ### 1. execute_command
-Универсальная команда для выполнения shell команд с настраиваемым выводом и логированием.
+A universal command for executing shell commands with customizable output and logging.
 
-**Параметры:**
-- `command` (string) - команда для выполнения
-- `workingDirectory` (string, optional) - рабочая директория для выполнения команды
-- `maxOutput` (number, optional, default: 500) - максимальное количество символов для вывода:
-  - `-1` - неограниченный вывод (используйте осторожно!)
-  - `0` - без вывода (только статус выполнения)
-  - `число > 0` - ограничить вывод указанным количеством символов
-- `enableLogging` (boolean, optional, default: true) - сохранять ли команду и результат в лог файл
+**Parameters:**
+- `command` (string) - the command to execute
+- `workingDirectory` (string, optional) - the working directory for executing the command
+- `maxOutput` (number, optional, default: 500) - the maximum number of characters for the output:
+  - `-1` - unlimited output (use with caution!)
+  - `0` - no output (only execution status)
+  - `number > 0` - limit the output to the specified number of characters
+- `enableLogging` (boolean, optional, default: true) - whether to save the command and result to a log file
 
-**Примеры использования:**
+**Usage Examples:**
 
 ```bash
-# Обычная команда с выводом по умолчанию (500 символов) и логированием
+# A regular command with default output (500 characters) and logging
 execute_command("ls -la")
 
-# Команда с полным выводом без ограничений
+# A command with full output without limits
 execute_command("cat small_file.txt", "/home/user", -1)
 
-# Docker build без вывода и без логирования
+# Docker build without output and without logging
 execute_command("docker build -t myapp .", "/project", 0, false)
 
-# Установка пакетов с минимальным выводом, без логирования
+# Installing packages with minimal output, without logging
 execute_command("npm install", "/project", 100, false)
 
-# Команда с перенаправлением вывода в файл (рекомендуется для больших выводов)
+# A command with output redirected to a file (recommended for large outputs)
 execute_command("find / -name '*.log' > /tmp/all_logs.txt 2>&1", "/", 0)
 ```
 
 ### 2. view_logs
-Просматривает последние записи из лог файла.
+Views the latest entries from the log file.
 
-**Параметры:**
-- `lines` (number, default: 10) - количество последних записей для отображения
+**Parameters:**
+- `lines` (number, default: 10) - the number of recent entries to display
 
-**Пример:**
+**Example:**
 ```bash
 view_logs(20)
 ```
 
-## Рекомендации по использованию
+## Usage Recommendations
 
-### Работа с командами с большим выводом
+### Working with commands with large output
 
-Для команд, генерирующих большой объём данных (логи, листинги, сборки), рекомендуется:
+For commands that generate a large amount of data (logs, listings, builds), it is recommended to:
 
-1. **Перенаправлять вывод в файл:**
-   ```bash
-   # Сохранить вывод в файл
-   execute_command("docker build -t myapp . > build.log 2>&1", "/project", 0)
-   
-   # Затем прочитать нужную часть
-   execute_command("tail -n 50 build.log", "/project")
-   ```
+1.  **Redirect output to a file:**
+    ```bash
+    # Save output to a file
+    execute_command("docker build -t myapp . > build.log 2>&1", "/project", 0)
+    
+    # Then read the necessary part
+    execute_command("tail -n 50 build.log", "/project")
+    ```
 
-2. **Использовать фильтрацию:**
-   ```bash
-   # Вместо полного лога
-   execute_command("npm install", "/project", 100)
-   
-   # Лучше отфильтровать важное
-   execute_command("npm install 2>&1 | grep -E '(error|warning|installed)'", "/project")
-   ```
+2.  **Use filtering:**
+    ```bash
+    # Instead of the full log
+    execute_command("npm install", "/project", 100)
+    
+    # Better to filter for important information
+    execute_command("npm install 2>&1 | grep -E '(error|warning|installed)'", "/project")
+    ```
 
-3. **Использовать параметр maxOutput=0 для длительных операций:**
-   ```bash
-   # Только статус выполнения
-   execute_command("./long_running_script.sh", "/scripts", 0)
-   ```
+3.  **Use the maxOutput=0 parameter for long-running operations:**
+    ```bash
+    # Only the execution status
+    execute_command("./long_running_script.sh", "/scripts", 0)
+    ```
 
-## Логирование
+## Logging
 
-Логи сохраняются в файл `~/.mcp-shell-commands.log` в формате JSON. Каждая запись содержит:
-- timestamp - время выполнения
-- command - выполненная команда
-- exitCode - код завершения (0 = успех, 1 = ошибка)
-- stdout - стандартный вывод
-- stderr - вывод ошибок
-- duration - время выполнения в миллисекундах
+Logs are saved to the `~/.mcp-shell-commands.log` file in JSON format. Each entry contains:
+- timestamp - execution time
+- command - the executed command
+- exitCode - exit code (0 = success, 1 = error)
+- stdout - standard output
+- stderr - error output
+- duration - execution time in milliseconds
 
-Логирование можно отключить для конкретной команды, установив `enableLogging: false`.
+Logging can be disabled for a specific command by setting `enableLogging: false`.
 
-## Конфигурация в Claude Desktop
+## Configuration in Claude Desktop
 
-Добавьте в файл конфигурации Claude Desktop:
+Add to your Claude Desktop configuration file:
 
 ```json
 {
@@ -115,8 +115,8 @@ view_logs(20)
 }
 ```
 
-## Версии
+## Versions
 
-- v2.0.0 - Упрощённый интерфейс с единой командой execute_command
-- v1.1.0 - Добавлена команда execute_command_no_log
-- v1.0.0 - Первоначальная версия
+- v2.0.0 - Simplified interface with a single execute_command
+- v1.1.0 - Added execute_command_no_log command
+- v1.0.0 - Initial version
