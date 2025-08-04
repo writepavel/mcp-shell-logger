@@ -1,27 +1,58 @@
 # MCP Shell Logger
 [![smithery badge](https://smithery.ai/badge/@writepavel/mcp-shell-logger)](https://smithery.ai/server/@writepavel/mcp-shell-logger)
 
-MCP server for executing shell commands with flexible output and logging settings.
+MCP server for executing shell commands with flexible output and logging settings on your local machine.
 
 ## Description
 
-This MCP server provides a universal tool for executing shell commands with control over output and logging. It is especially useful for working with commands that generate a large amount of output.
+This MCP server provides a universal tool for executing shell commands with control over output and logging. It runs locally on your machine and executes commands in your shell environment. It is especially useful for working with commands that generate a large amount of output.
 
 ## Installation
 
-### Installing via Smithery
-
-To install mcp-shell-logger for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@writepavel/mcp-shell-logger):
+### Option 1: Install via npm (Recommended for local usage)
 
 ```bash
-npx -y @smithery/cli install @writepavel/mcp-shell-logger --client claude
+npm install -g @writepavel/mcp-shell-logger
 ```
 
-### Manual Installation
+Then add to your Claude Desktop configuration:
+```json
+{
+  "mcpServers": {
+    "mcp-shell-logger": {
+      "command": "mcp-shell-logger"
+    }
+  }
+}
+```
 
+### Option 2: Install from source
+
+1. Clone the repository:
 ```bash
+git clone https://github.com/writepavel/mcp-shell-logger.git
+cd mcp-shell-logger
 npm install
 ```
+
+2. Add to Claude Desktop configuration:
+```json
+{
+  "mcpServers": {
+    "mcp-shell-logger": {
+      "command": "node",
+      "args": ["/path/to/mcp-shell-logger/index.js"]
+    }
+  }
+}
+```
+
+### Configuration File Location
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+For detailed installation instructions, see [INSTALLATION.md](./INSTALLATION.md).
 
 ## Usage
 

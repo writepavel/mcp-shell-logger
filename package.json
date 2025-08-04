@@ -1,7 +1,7 @@
 {
-  "name": "mcp-shell-logger",
+  "name": "@writepavel/mcp-shell-logger",
   "version": "2.0.0",
-  "description": "MCP server for shell command execution with logging",
+  "description": "MCP server for shell command execution with logging on your local machine",
   "type": "module",
   "main": "index.js",
   "module": "./index.js",
@@ -18,8 +18,26 @@
   "keywords": [
     "mcp",
     "shell",
-    "logging"
+    "logging",
+    "local",
+    "command-execution"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": "writepavel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/writepavel/mcp-shell-logger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/writepavel/mcp-shell-logger/issues"
+  },
+  "homepage": "https://github.com/writepavel/mcp-shell-logger#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ]
 }

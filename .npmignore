@@ -1,0 +1,28 @@
+# Development files
+.smithery/
+.git/
+.gitignore
+.DS_Store
+
+# Smithery-specific files
+smithery.yaml
+Dockerfile
+
+# Development configs
+.env
+.env.local
+.claude/
+
+# Logs
+*.log
+
+# Source control
+.git/
+.github/
+
+# npm
+node_modules/
+npm-debug.log
+
+# Recovery guides
+GIT_RECOVERY_GUIDE.md

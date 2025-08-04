@@ -1,20 +1,42 @@
 # Smithery configuration file: https://smithery.ai/docs/build/project-config
 
-# Mark this as a local MCP server with stdio transport
+# This MCP server runs locally on user's machine
 runtime: node
 
+# Installation instructions for local usage
+installation:
+  npmPackage: '@writepavel/mcp-shell-logger'
+  type: 'local'
+  
 # Local installation configuration
 startCommand:
   type: stdio
   commandFunction: |
-    (config) => ({ 
-      command: 'node', 
-      args: ['index.js'],
-      env: {
-        ...process.env,
-        ...config
+    (config) => {
+      // For npm-installed package
+      const isNpmInstalled = true;
+      
+      if (isNpmInstalled) {
+        return { 
+          command: 'npx',
+          args: ['@writepavel/mcp-shell-logger'],
+          env: {
+            ...process.env,
+            ...config
+          }
+        };
+      } else {
+        // For source installation
+        return { 
+          command: 'node', 
+          args: ['index.js'],
+          env: {
+            ...process.env,
+            ...config
+          }
+        };
       }
-    })
+    }
   configSchema:
     type: object
     properties:
@@ -36,6 +58,10 @@ startCommand:
 metadata:
   name: 'mcp-shell-logger'
   version: '2.0.0'
-  description: 'MCP server for shell command execution with logging'
+  description: 'MCP server for local shell command execution with logging'
   type: 'local'
   transport: 'stdio'
+  installation:
+    local: true
+    npm: '@writepavel/mcp-shell-logger'
+    instructions: 'This server runs locally on your machine. Install via npm: npm install -g @writepavel/mcp-shell-logger'
