@@ -1,0 +1,11 @@
+{
+  "runtime": "node",
+  "type": "local",
+  "transport": "stdio",
+  "entry": "index.js",
+  "build": {
+    "steps": [
+      "npm install --production"
+    ]
+  }
+}

@@ -1,13 +1,41 @@
 # Smithery configuration file: https://smithery.ai/docs/build/project-config
 
+# Mark this as a local MCP server with stdio transport
+runtime: node
+
+# Local installation configuration
 startCommand:
   type: stdio
-  commandFunction:
-    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
-    |-
-    (config) => ({ command: 'node', args: ['index.js'] })
+  commandFunction: |
+    (config) => ({ 
+      command: 'node', 
+      args: ['index.js'],
+      env: {
+        ...process.env,
+        ...config
+      }
+    })
   configSchema:
-    # JSON Schema defining the configuration options for the MCP.
     type: object
-    properties: {}
-  exampleConfig: {}
+    properties:
+      logLevel:
+        type: string
+        enum: ['debug', 'info', 'warn', 'error']
+        default: 'info'
+        description: 'Logging level for the MCP server'
+      maxOutputSize:
+        type: number
+        default: 500
+        description: 'Default maximum output size for shell commands'
+    additionalProperties: false
+  exampleConfig:
+    logLevel: 'info'
+    maxOutputSize: 500
+
+# Metadata for Smithery
+metadata:
+  name: 'mcp-shell-logger'
+  version: '2.0.0'
+  description: 'MCP server for shell command execution with logging'
+  type: 'local'
+  transport: 'stdio'
