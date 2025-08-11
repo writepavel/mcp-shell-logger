@@ -6,3 +6,14 @@ node_modules/
 .claude/settings.local.json
 .smithery/dist/
 .smithery/cache/
+
+# Lab directory (experimental files)
+lab/
+
+# Git backups
+.git.backup.*
+
+# Temporary files
+*.tmp
+*.swp
+*~
